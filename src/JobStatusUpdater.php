@@ -41,13 +41,13 @@ class JobStatusUpdater
             }
         }
 
-        $jobStatus->update($data);
+        $jobStatus->setConnection(config('job-status.database_connection'))->update($data);
     }
 
     protected function updateJob($job, array $data)
     {
         if ($jobStatus = $this->getJobStatus($job)) {
-            $jobStatus->update($data);
+            $jobStatus->setConnection(config('job-status.database_connection'))->update($data);
 
             return $jobStatus;
         }
