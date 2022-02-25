@@ -15,6 +15,11 @@ trait Trackable
      */
     public $jobStatus;
 
+    /**
+     * @var int
+     */
+    public $temporaryLimit;
+
     public function setProgressMax($value)
     {
         $this->update(['progress_max' => $value]);
@@ -43,6 +48,16 @@ trait Trackable
     public function setOutput(array $value)
     {
         $this->update(['output' => $value]);
+    }
+
+    public function setTemporaryLimit($value)
+    {
+        $this->temporaryLimit = $value;
+    }
+
+    public function unsetTemporaryLimit()
+    {
+        $this->temporaryLimit = null;
     }
 
     public function update(array $data)
