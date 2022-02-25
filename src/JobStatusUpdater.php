@@ -16,7 +16,7 @@ class JobStatusUpdater
             $this->updateEvent($job, $data);
         }
 
-        $this->updateJob($job, $data);
+        return $this->updateJob($job, $data);
     }
 
     /**
@@ -48,6 +48,8 @@ class JobStatusUpdater
     {
         if ($jobStatus = $this->getJobStatus($job)) {
             $jobStatus->update($data);
+
+            return $jobStatus;
         }
     }
 
@@ -85,11 +87,17 @@ class JobStatusUpdater
 
     protected function getJobStatus($job)
     {
-        if ($id = $this->getJobStatusId($job)) {
-            /** @var JobStatus $entityClass */
-            $entityClass = app(config('job-status.model'));
+        try {
+            if ($job instanceof TrackableJob || method_exists($job, 'getJobStatus')) {
+                return $job->getJobStatus();
+            }
+        } catch (\Throwable $e) {
+            if ($id = $this->getJobStatusId($job)) {
+                /** @var JobStatus $entityClass */
+                $entityClass = app(config('job-status.model'));
 
-            return $entityClass::on(config('job-status.database_connection'))->whereKey($id)->first();
+                return $entityClass::on(config('job-status.database_connection'))->whereKey($id)->first();
+            }
         }
 
         return null;

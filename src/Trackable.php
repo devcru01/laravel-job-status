@@ -10,13 +10,18 @@ trait Trackable
     protected $progressMax = 0;
     protected $shouldTrack = true;
 
-    protected function setProgressMax($value)
+    /**
+     * @var JobStatus
+     */
+    public $jobStatus;
+
+    public function setProgressMax($value)
     {
         $this->update(['progress_max' => $value]);
         $this->progressMax = $value;
     }
 
-    protected function setProgressNow($value, $every = 1)
+    public function setProgressNow($value, $every = 1)
     {
         if ($value % $every === 0 || $value === $this->progressMax) {
             $this->update(['progress_now' => $value]);
@@ -24,30 +29,34 @@ trait Trackable
         $this->progressNow = $value;
     }
 
-    protected function incrementProgress($offset = 1, $every = 1)
+    public function incrementProgress($offset = 1, $every = 1)
     {
         $value = $this->progressNow + $offset;
         $this->setProgressNow($value, $every);
     }
 
-    protected function setInput(array $value)
+    public function setInput(array $value)
     {
         $this->update(['input' => $value]);
     }
 
-    protected function setOutput(array $value)
+    public function setOutput(array $value)
     {
         $this->update(['output' => $value]);
     }
 
-    protected function update(array $data)
+    public function update(array $data)
     {
         /** @var JobStatusUpdater */
         $updater = app(JobStatusUpdater::class);
-        $updater->update($this, $data);
+        $jobStatus = $updater->update($this, $data);
+
+        if ($jobStatus) {
+            $this->jobStatus = $jobStatus;
+        }
     }
 
-    protected function prepareStatus(array $data = [])
+    public function prepareStatus(array $data = [])
     {
         if (!$this->shouldTrack) {
             return;
@@ -61,9 +70,10 @@ trait Trackable
         $status = $entityClass::query()->create($data);
 
         $this->statusId = $status->getKey();
+        $this->jobStatus = $status;
     }
 
-    protected function getDisplayName()
+    public function getDisplayName()
     {
         return method_exists($this, 'displayName') ? $this->displayName() : static::class;
     }
@@ -71,5 +81,10 @@ trait Trackable
     public function getJobStatusId()
     {
         return $this->statusId;
+    }
+
+    public function getJobStatus()
+    {
+        return $this->jobStatus;
     }
 }
