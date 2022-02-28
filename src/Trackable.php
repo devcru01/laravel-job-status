@@ -4,10 +4,24 @@ namespace Imtigger\LaravelJobStatus;
 
 trait Trackable
 {
-    /** @var int */
+    /**
+     * @var int
+     */
     protected $statusId;
-    protected $progressNow = 0;
-    protected $progressMax = 0;
+
+    /**
+     * @var int
+     */
+    public $progressNow = 0;
+
+    /**
+     * @var int
+     */
+    public $progressMax = 0;
+
+    /**
+     * @var bool
+     */
     protected $shouldTrack = true;
 
     /**
@@ -86,6 +100,14 @@ trait Trackable
 
         $this->statusId = $status->getKey();
         $this->jobStatus = $status;
+
+        if (array_key_exists('progress_now', $data)) {
+            $this->progressMax = $data['progress_now'];
+        }
+
+        if (array_key_exists('progress_max', $data)) {
+            $this->progressMax = $data['progress_max'];
+        }
     }
 
     public function getDisplayName()
