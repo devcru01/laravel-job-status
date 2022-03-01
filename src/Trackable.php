@@ -48,6 +48,13 @@ trait Trackable
         $this->progressNow = $value;
     }
 
+    public function setProgressNowEqualToProgressMax()
+    {
+        if ($this->progressNow !== $this->progressMax) {
+            $this->setProgressNow($this->progressMax);
+        }
+    }
+
     public function incrementProgress($offset = 1, $every = 1)
     {
         $value = $this->progressNow + $offset;
